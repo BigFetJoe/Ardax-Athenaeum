@@ -1,0 +1,69 @@
+version: '3.8'
+
+networks:
+  ardax_net:
+    name: ardax_net
+
+services:
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '127.0.0.1:81:81' # Tranca a porta 81 apenas para o seu túnel SSH
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - ardax_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    environment:
+      - NODE_FUNCTION_ALLOW_EXTERNAL=moment,lodash
+      - WEBHOOK_URL= https://n8n.ardax-athenaeum.duckdns.org/
+      - N8N_PROXY_HOPS=2
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./shared_obsidian:/files/obsidian
+    networks:
+      - ardax_net
+
+  syncthing:
+    image: syncthing/syncthing
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - syncthing_data:/var/syncthing
+      - ./shared_obsidian:/var/syncthing/Obsidian_Vault
+    ports:
+      - '22000:22000/tcp' # Necessário para a sincronização P2P de arquivos
+      - '22000:22000/udp'
+      - '21027:21027/udp'
+    networks:
+      - ardax_net
+
+  discord-bridge:
+    build: ./discord-bridge
+    # (build: ./discord-bridge indica ao Compose que ele deve entrar nessa subpasta para procurar o Dockerfile)
+    container_name: discord_n8n_bridge
+    restart: always
+    environment:
+      - DISCORD_TOKEN=seu_token_aqui
+      - N8N_WEBHOOK_URL=
+    depends_on:
+      - nome_do_container_do_n8n
+    # (depends_on garante a ordem de inicialização: o bot só sobe após o container do n8n já estar ativo)
+    networks:
+      - ardax_net
+
+volumes:
+  npm_data:
+  npm_letsencrypt:
+  n8n_data:
+  syncthing_data:
