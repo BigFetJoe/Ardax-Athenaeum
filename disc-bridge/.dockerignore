@@ -1,0 +1,15 @@
+# Fica na pasta do contexto de build (build: ./disc-bridge no compose).
+# O COPY . . do dockerfile ignora tudo listado aqui.
+
+# Segredos: NUNCA dentro da imagem. As variaveis chegam pelo Compose,
+# lidas do .env que fica ao lado do docker-compose.yml.
+.env
+*.env
+
+# Dependencias sao instaladas no build (npm install), nao copiadas.
+node_modules/
+
+# Lixo que so incha a imagem e invalida o cache a toa.
+.git/
+.gitignore
+npm-debug.log*
