@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   ardax_net:
     name: ardax_net
@@ -50,6 +48,28 @@ services:
     networks:
       - ardax_net
 
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      # Volume nomeado: os dados vivem FORA do container. Apagar o container nao apaga o banco.
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ardax_net
+    # Sem "ports": o banco so e' alcancavel de dentro da rede ardax_net.
+    # Para acessar do PC, tunel SSH -- nunca abrindo a porta ao mundo.
+    healthcheck:
+      # O $$ escapa o $: sem isso o Compose tentaria substituir a variavel aqui,
+      # em vez de deixar o shell de dentro do container resolve-la.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   discord-bridge:
     build: ./disc-bridge
     # (build: ./discord-bridge indica ao Compose que ele deve entrar nessa subpasta para procurar o Dockerfile)
@@ -70,3 +90,4 @@ volumes:
   npm_letsencrypt:
   n8n_data:
   syncthing_data:
+  postgres_data:
