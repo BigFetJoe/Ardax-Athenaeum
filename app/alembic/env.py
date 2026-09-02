@@ -10,7 +10,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from ardax.models import SCHEMA, Base
+from ardax.models import Base
 
 config = context.config
 
@@ -34,7 +34,6 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         include_schemas=True,
-        version_table_schema=SCHEMA,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -53,8 +52,12 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            # A tabela de controle do Alembic tambem mora no schema tarefas.
-            version_table_schema=SCHEMA,
+            # A tabela de controle (alembic_version) fica na pasta padrao, NAO em
+            # "tarefas". Dois motivos:
+            # 1) Ordem: o schema tarefas so nasce dentro da migracao 0001, e o Alembic
+            #    cria a tabela de controle ANTES de rodar qualquer migracao.
+            # 2) Sentido: o historico de migracoes e' do banco inteiro. Quando existirem
+            #    os schemas notas e diario, continuara sendo um so.
         )
         with context.begin_transaction():
             context.run_migrations()
