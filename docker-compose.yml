@@ -70,6 +70,20 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build: ./app
+    restart: always
+    environment:
+      # Montada a partir das variaveis que ja existem -- nenhum segredo novo.
+      # "postgres" e' o nome do servico: dentro da rede do Docker isso vira endereco.
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ardax_net
+    # Sem "ports": quem publica para fora e' o Nginx Proxy Manager, no A3.
+
   discord-bridge:
     build: ./disc-bridge
     # (build: ./discord-bridge indica ao Compose que ele deve entrar nessa subpasta para procurar o Dockerfile)

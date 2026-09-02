@@ -1,0 +1,14 @@
+# Faixas em vez de versoes exatas: projeto pessoal, atualizar e' barato.
+# Se algum dia um build quebrar por versao nova, e' aqui que se trava.
+
+# Servidor web (entra em uso no A3)
+fastapi>=0.115
+uvicorn[standard]>=0.32
+
+# Camada de banco
+sqlalchemy>=2.0,<3
+alembic>=1.13
+
+# Driver do Postgres (versao 3). "binary" traz o binario pronto,
+# sem precisar compilar nada no build.
+psycopg[binary]>=3.1

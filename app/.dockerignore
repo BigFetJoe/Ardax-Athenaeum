@@ -1,0 +1,11 @@
+# Mesma licao do disc-bridge: .gitignore nao protege o Docker.
+.env
+*.env
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+.git/
+.gitignore
