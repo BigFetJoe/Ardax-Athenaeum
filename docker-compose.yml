@@ -49,7 +49,10 @@ services:
       - ardax_net
 
   postgres:
-    image: postgres:16-alpine
+    # pgvector/pgvector:pg16 = o mesmo Postgres 16, com a extensao vector ja
+    # compilada dentro. A imagem oficial nao tem, e "CREATE EXTENSION vector"
+    # quebraria. Trocada em 2026-09-28; o volume de dados e' o mesmo.
+    image: pgvector/pgvector:pg16
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -70,19 +73,10 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
-    build: ./app
-    restart: always
-    environment:
-      # Montada a partir das variaveis que ja existem -- nenhum segredo novo.
-      # "postgres" e' o nome do servico: dentro da rede do Docker isso vira endereco.
-      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - ardax_net
-    # Sem "ports": quem publica para fora e' o Nginx Proxy Manager, no A3.
+  # O servico "api" (FastAPI + Alembic) foi removido em 2026-09-28.
+  # Decisao: no MVP o n8n e' a porta unica de escrita e fala com o Postgres
+  # pelo no nativo -- nao ha o que a API Python faria. A pasta app/ segue no
+  # repositorio como historico; o git guarda tudo se um dia voltar.
 
   discord-bridge:
     build: ./disc-bridge
