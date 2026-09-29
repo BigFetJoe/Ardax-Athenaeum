@@ -22,7 +22,14 @@
 
 BEGIN;
 
-CREATE OR REPLACE VIEW ardax.v_hoje AS
+-- DROP + CREATE, e nao CREATE OR REPLACE.
+-- O "OR REPLACE" do Postgres so troca o CORPO da visao: a lista de colunas
+-- tem que continuar identica, ou no maximo ganhar colunas NO FIM. Como
+-- dias_ate_prazo entra no meio, ele leria como "renomear a coluna 5" e
+-- recusaria. Visao nao guarda dado, entao apagar e recriar e' de graca.
+DROP VIEW IF EXISTS ardax.v_hoje;
+
+CREATE VIEW ardax.v_hoje AS
 SELECT
   i.id,
   i.titulo,
