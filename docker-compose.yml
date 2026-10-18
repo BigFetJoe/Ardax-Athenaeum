@@ -93,7 +93,36 @@ services:
     networks:
       - ardax_net
 
+  # ═══ Servidor de sincronizacao do Anki (adicionado 2026-10-18) ═══
+  # Sai do PC e vem para ca'. Motivo: o celular precisa sincronizar com
+  # algo que esteja sempre no ar -- PC desligado nao serve.
+  #
+  # Sem "ports": quem expoe para a internet e' o NPM, com HTTPS e um
+  # subdominio. O AnkiDroid fala HTTPS; sem o proxy a senha de sync
+  # andaria em claro.
+  anki-sync:
+    build: ./anki-sync
+    container_name: ardax_anki_sync
+    restart: always
+    environment:
+      # Formato exigido pelo servidor: "usuario:senha" numa so' variavel.
+      - SYNC_USER1=${ANKI_SYNC_USER}:${ANKI_SYNC_PASS}
+    volumes:
+      # A colecao autoritativa vive aqui. Depois do primeiro sync, este
+      # volume e' a coisa mais valiosa do servico.
+      - anki_data:/data
+    networks:
+      - ardax_net
+    logging:
+      # Divida registrada do indice: o driver json-file sem limite enche
+      # o disco. Fechada aqui para o servico novo.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
+  anki_data:
   npm_data:
   npm_letsencrypt:
   n8n_data:
