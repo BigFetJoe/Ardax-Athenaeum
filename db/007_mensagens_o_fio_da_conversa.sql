@@ -47,7 +47,11 @@ CREATE TABLE ardax.mensagens (
 
   -- A que item esta mensagem deu origem, ou em qual ela mexeu.
   -- Nulo em consulta, em conversa solta e em erro.
-  item_id    bigint REFERENCES ardax.itens(id),
+  --
+  -- uuid, nao bigint: a chave de ardax.itens e' uuid. O "numero" curto
+  -- (bigint, da migracao 003) e' so' para ele digitar no Telegram --
+  -- apontar por ele aqui seria apontar para um apelido.
+  item_id    uuid REFERENCES ardax.itens(id),
 
   -- O que o classificador decidiu. Guardado para que a correção possa
   -- ver o que deu errado, e para auditar o prompt em lote depois.
